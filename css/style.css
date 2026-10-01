@@ -174,8 +174,6 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .footer-socials { display: flex; gap: 16px; }
 .footer-socials a { color: #687384; font-size: 12px; font-weight: 600; }
 .footer-socials a:hover { color: #2469B3; }
-.back-to-top { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid #DFE9F5; border-radius: 9px; color: #4285C8; background: #F5F9FF; font-size: 19px; transition: background .2s ease, transform .2s ease; }
-.back-to-top:hover { transform: translateY(-2px); background: #EAF4FF; }
 
 .reveal { opacity: 0; transform: translateY(18px); transition: opacity .65s ease, transform .65s ease; }
 .reveal.is-visible { opacity: 1; transform: translateY(0); }
@@ -347,11 +345,19 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 :root[data-theme="dark"] .footer-content p { color: #A1AEC0; }
 :root[data-theme="dark"] .footer-socials a { color: #C0CAD8; }
 :root[data-theme="dark"] .footer-socials a:hover { color: #BFDBFE; }
-:root[data-theme="dark"] .back-to-top { border-color: #3B5069; color: #BFDBFE; background: #1B2638; }
-:root[data-theme="dark"] .back-to-top:hover { background: #25364D; }
 :root[data-theme="dark"] .menu-toggle { border-color: #3B5069; background: #1B2638; }
 :root[data-theme="dark"] .menu-toggle span { background: #D1D9E5; }
 :root[data-theme="dark"] .skip-link { color: #111827; background: #F9FAFB; }
+
+::view-transition-old(root),
+::view-transition-new(root) { animation-duration: 300ms; }
+::view-transition-old(root) { animation-name: theme-fade-out; }
+::view-transition-new(root) { animation-name: theme-fade-in; }
+@keyframes theme-fade-out { to { opacity: 0; } }
+@keyframes theme-fade-in { from { opacity: 0; } }
+.theme-transitioning,
+.theme-transitioning body,
+.theme-transitioning body * { transition: color .3s ease, background-color .3s ease, border-color .3s ease, box-shadow .3s ease !important; }
 
 @media (max-width: 680px) {
   .theme-toggle { width: 100%; height: auto; justify-content: flex-start; gap: 12px; padding: 10px 8px; border: 0; color: #586272; background: transparent; font-size: 14px; font-weight: 600; }
@@ -360,4 +366,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   :root[data-theme="dark"] .nav-links { border-color: #273449; background: rgba(17, 24, 39, .98); }
   :root[data-theme="dark"] .theme-toggle { color: #D1D5DB; background: transparent; }
   :root[data-theme="dark"] .theme-toggle:hover { background: #25364D; }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) { animation: none; }
 }

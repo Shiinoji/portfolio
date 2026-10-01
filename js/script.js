@@ -23,7 +23,22 @@ applyTheme(savedTheme || (prefersDark ? "dark" : "light"));
 
 themeToggle.addEventListener("click", () => {
   const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (prefersReducedMotion) {
+    applyTheme(nextTheme, true);
+    return;
+  }
+
+  if (document.startViewTransition) {
+    document.startViewTransition(() => applyTheme(nextTheme, true));
+    return;
+  }
+
+  const root = document.documentElement;
+  root.classList.add("theme-transitioning");
   applyTheme(nextTheme, true);
+  window.setTimeout(() => root.classList.remove("theme-transitioning"), 350);
 });
 
 function closeMenu() {
