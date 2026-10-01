@@ -14,28 +14,30 @@ const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
 if (window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
     !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-  let pointerX = 0;
-  let pointerY = 0;
-  let pointerFrame = 0;
+  [hero, document.querySelector(".skills-section")].forEach((section) => {
+    let pointerX = 0;
+    let pointerY = 0;
+    let pointerFrame = 0;
 
-  hero.addEventListener("pointermove", (event) => {
-    pointerX = event.clientX;
-    pointerY = event.clientY;
+    section.addEventListener("pointermove", (event) => {
+      pointerX = event.clientX;
+      pointerY = event.clientY;
 
-    if (pointerFrame) return;
-    pointerFrame = window.requestAnimationFrame(() => {
-      const bounds = hero.getBoundingClientRect();
-      hero.style.setProperty("--cursor-x", `${((pointerX - bounds.left) / bounds.width) * 100}%`);
-      hero.style.setProperty("--cursor-y", `${((pointerY - bounds.top) / bounds.height) * 100}%`);
-      pointerFrame = 0;
+      if (pointerFrame) return;
+      pointerFrame = window.requestAnimationFrame(() => {
+        const bounds = section.getBoundingClientRect();
+        section.style.setProperty("--cursor-x", `${((pointerX - bounds.left) / bounds.width) * 100}%`);
+        section.style.setProperty("--cursor-y", `${((pointerY - bounds.top) / bounds.height) * 100}%`);
+        pointerFrame = 0;
+      });
     });
-  });
 
-  hero.addEventListener("pointerleave", () => {
-    window.cancelAnimationFrame(pointerFrame);
-    pointerFrame = 0;
-    hero.style.removeProperty("--cursor-x");
-    hero.style.removeProperty("--cursor-y");
+    section.addEventListener("pointerleave", () => {
+      window.cancelAnimationFrame(pointerFrame);
+      pointerFrame = 0;
+      section.style.removeProperty("--cursor-x");
+      section.style.removeProperty("--cursor-y");
+    });
   });
 }
 
