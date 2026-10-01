@@ -1,0 +1,130 @@
+const header = document.querySelector(".site-header");
+const menuToggle = document.querySelector(".menu-toggle");
+const navLinks = document.querySelector(".nav-links");
+const navItems = [...document.querySelectorAll(".nav-link")];
+const sections = [...document.querySelectorAll("main section[id]")];
+const contactForm = document.querySelector("#contact-form");
+const formStatus = document.querySelector("#form-status");
+const themeToggle = document.querySelector(".theme-toggle");
+const savedTheme = localStorage.getItem("portfolio-theme");
+const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+function applyTheme(theme, savePreference = false) {
+  const isDark = theme === "dark";
+  document.documentElement.dataset.theme = isDark ? "dark" : "light";
+  themeToggle.setAttribute("aria-pressed", String(isDark));
+  themeToggle.setAttribute("aria-label", `Switch to ${isDark ? "light" : "dark"} mode`);
+  themeToggle.querySelector(".theme-toggle-label").textContent = `${isDark ? "Light" : "Dark"} mode`;
+
+  if (savePreference) localStorage.setItem("portfolio-theme", theme);
+}
+
+applyTheme(savedTheme || (prefersDark ? "dark" : "light"));
+
+themeToggle.addEventListener("click", () => {
+  const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  applyTheme(nextTheme, true);
+});
+
+function closeMenu() {
+  menuToggle.setAttribute("aria-expanded", "false");
+  menuToggle.setAttribute("aria-label", "Open navigation menu");
+  navLinks.classList.remove("is-open");
+}
+
+menuToggle.addEventListener("click", () => {
+  const isOpen = menuToggle.getAttribute("aria-expanded") === "true";
+  menuToggle.setAttribute("aria-expanded", String(!isOpen));m
+  menuToggle.setAttribute("aria-label", isOpen ? "Open navigation menu" : "Close navigation menu");
+  navLinks.classList.toggle("is-open", !isOpen);
+});
+
+navItems.forEach((link) => {
+  link.addEventListener("click", closeMenu);
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && menuToggle.getAttribute("aria-expanded") === "true") {
+    closeMenu();
+    menuToggle.focus();
+  }
+});
+
+const updateHeader = () => {
+  header.classList.toggle("scrolled", window.scrollY > 12);
+};
+window.addEventListener("scroll", updateHeader, { passive: true });
+updateHeader();
+
+if ("IntersectionObserver" in window) {
+  const sectionObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      navItems.forEach((link) => {
+        const isActive = link.getAttribute("href") === `#${entry.target.id}`;
+        link.classList.toggle("active", isActive);
+        if (isActive) link.setAttribute("aria-current", "location");
+        else link.removeAttribute("aria-current");
+      });
+    });
+  }, { rootMargin: "-35% 0px -55% 0px", threshold: 0 });
+
+  sections.forEach((section) => sectionObserver.observe(section));
+
+  const revealObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add("is-visible");
+      observer.unobserve(entry.target);
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll(".reveal").forEach((element) => revealObserver.observe(element));
+} else {
+  document.querySelectorAll(".reveal").forEach((element) => element.classList.add("is-visible"));
+}
+
+document.querySelector("#current-year").textContent = new Date().getFullYear();
+
+const validationRules = {
+  name: (value) => value.trim().length >= 2 ? "" : "Please enter at least 2 characters for your name.",
+  email: (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()) ? "" : "Please enter a valid email address.",
+  message: (value) => value.trim().length >= 10 ? "" : "Please enter a message of at least 10 characters."
+};
+
+function validateField(field) {
+  const errorElement = document.querySelector(`#${field.name}-error`);
+  const errorMessage = validationRules[field.name](field.value);
+  field.setAttribute("aria-invalid", String(Boolean(errorMessage)));
+  errorElement.textContent = errorMessage;
+  return !errorMessage;
+}
+
+Object.keys(validationRules).forEach((fieldName) => {
+  const field = contactForm.elements[fieldName];
+  field.addEventListener("input", () => {
+    if (field.hasAttribute("aria-invalid")) validateField(field);
+    formStatus.textContent = "";
+  });
+  field.addEventListener("blur", () => validateField(field));
+});
+
+contactForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const fields = Object.keys(validationRules).map((fieldName) => contactForm.elements[fieldName]);
+  const isValid = fields.map(validateField).every(Boolean);
+
+  if (!isValid) {
+    fields.find((field) => field.getAttribute("aria-invalid") === "true").focus();
+    formStatus.textContent = "";
+    return;
+  }
+
+  // Connect a backend or form service here; this client-only demo does not send email.
+  contactForm.reset();
+  fields.forEach((field) => {
+    field.removeAttribute("aria-invalid");
+    document.querySelector(`#${field.name}-error`).textContent = "";
+  });
+  formStatus.textContent = "Thanks for reaching out! This demo doesn’t send your message yet — please email me directly.";
+});
