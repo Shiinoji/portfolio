@@ -8,36 +8,31 @@ const formStatus = document.querySelector("#form-status");
 const submitButton = contactForm.querySelector('button[type="submit"]');
 const submitButtonLabel = submitButton.innerHTML;
 const themeToggle = document.querySelector(".theme-toggle");
-const hero = document.querySelector(".hero");
 const savedTheme = localStorage.getItem("portfolio-theme");
 const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
 if (window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
     !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-  [hero, document.querySelector(".skills-section")].forEach((section) => {
-    let pointerX = 0;
-    let pointerY = 0;
-    let pointerFrame = 0;
+  let pointerX = 0;
+  let pointerY = 0;
+  let pointerFrame = 0;
 
-    section.addEventListener("pointermove", (event) => {
-      pointerX = event.clientX;
-      pointerY = event.clientY;
-
-      if (pointerFrame) return;
-      pointerFrame = window.requestAnimationFrame(() => {
-        const bounds = section.getBoundingClientRect();
-        section.style.setProperty("--cursor-x", `${((pointerX - bounds.left) / bounds.width) * 100}%`);
-        section.style.setProperty("--cursor-y", `${((pointerY - bounds.top) / bounds.height) * 100}%`);
-        pointerFrame = 0;
-      });
-    });
-
-    section.addEventListener("pointerleave", () => {
-      window.cancelAnimationFrame(pointerFrame);
+  document.addEventListener("pointermove", (event) => {
+    pointerX = event.clientX;
+    pointerY = event.clientY;
+    if (pointerFrame) return;
+    pointerFrame = window.requestAnimationFrame(() => {
+      document.body.style.setProperty("--cursor-x", `${pointerX}px`);
+      document.body.style.setProperty("--cursor-y", `${pointerY}px`);
       pointerFrame = 0;
-      section.style.removeProperty("--cursor-x");
-      section.style.removeProperty("--cursor-y");
     });
+  });
+
+  document.addEventListener("pointerleave", () => {
+    window.cancelAnimationFrame(pointerFrame);
+    pointerFrame = 0;
+    document.body.style.removeProperty("--cursor-x");
+    document.body.style.removeProperty("--cursor-y");
   });
 }
 
