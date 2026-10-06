@@ -8,6 +8,8 @@ const formStatus = document.querySelector("#form-status");
 const submitButton = contactForm.querySelector('button[type="submit"]');
 const submitButtonLabel = submitButton.innerHTML;
 const themeToggle = document.querySelector(".theme-toggle");
+const studioIntro = document.querySelector("#studio-intro");
+const introSkip = studioIntro.querySelector(".intro-skip");
 const savedTheme = localStorage.getItem("portfolio-theme");
 const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
@@ -34,6 +36,21 @@ if (window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
     document.body.style.removeProperty("--cursor-x");
     document.body.style.removeProperty("--cursor-y");
   });
+
+  document.querySelectorAll(".skill-card, .project-card").forEach((card) => {
+    card.addEventListener("pointermove", (event) => {
+      const bounds = card.getBoundingClientRect();
+      const pointerX = (event.clientX - bounds.left) / bounds.width - 0.5;
+      const pointerY = (event.clientY - bounds.top) / bounds.height - 0.5;
+      card.style.setProperty("--tilt-x", `${pointerY * -6}deg`);
+      card.style.setProperty("--tilt-y", `${pointerX * 6}deg`);
+    });
+
+    card.addEventListener("pointerleave", () => {
+      card.style.removeProperty("--tilt-x");
+      card.style.removeProperty("--tilt-y");
+    });
+  });
 }
 
 function applyTheme(theme, savePreference = false) {
@@ -47,6 +64,25 @@ function applyTheme(theme, savePreference = false) {
 }
 
 applyTheme(savedTheme || (prefersDark ? "dark" : "light"));
+
+let introDismissTimer;
+function dismissStudioIntro() {
+  if (!studioIntro.open || studioIntro.classList.contains("is-leaving")) return;
+  window.clearTimeout(introDismissTimer);
+  studioIntro.classList.add("is-leaving");
+  window.setTimeout(() => studioIntro.close(), 450);
+}
+
+introSkip.addEventListener("click", dismissStudioIntro);
+studioIntro.addEventListener("cancel", (event) => {
+  event.preventDefault();
+  dismissStudioIntro();
+});
+
+if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  studioIntro.showModal();
+  introDismissTimer = window.setTimeout(dismissStudioIntro, 2800);
+}
 
 themeToggle.addEventListener("click", () => {
   const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
@@ -92,11 +128,21 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-const updateHeader = () => {
+let scrollEffectsFrame = 0;
+const updateScrollEffects = () => {
   header.classList.toggle("scrolled", window.scrollY > 12);
+  if (scrollEffectsFrame) return;
+
+  scrollEffectsFrame = window.requestAnimationFrame(() => {
+    const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = scrollableHeight > 0 ? (window.scrollY / scrollableHeight) * 100 : 0;
+    document.documentElement.style.setProperty("--scroll-progress", `${progress}%`);
+    scrollEffectsFrame = 0;
+  });
 };
-window.addEventListener("scroll", updateHeader, { passive: true });
-updateHeader();
+window.addEventListener("scroll", updateScrollEffects, { passive: true });
+window.addEventListener("resize", updateScrollEffects);
+updateScrollEffects();
 
 if ("IntersectionObserver" in window) {
   const sectionObserver = new IntersectionObserver((entries) => {
