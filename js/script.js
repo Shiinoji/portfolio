@@ -3,6 +3,7 @@ const menuToggle = document.querySelector(".menu-toggle");
 const navLinks = document.querySelector(".nav-links");
 const navItems = [...document.querySelectorAll(".nav-link")];
 const sections = [...document.querySelectorAll("main section[id]")];
+const hero = document.querySelector(".hero");
 const contactForm = document.querySelector("#contact-form");
 const formStatus = document.querySelector("#form-status");
 const submitButton = contactForm.querySelector('button[type="submit"]');
@@ -26,6 +27,8 @@ if (window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
     pointerFrame = window.requestAnimationFrame(() => {
       document.body.style.setProperty("--cursor-x", `${pointerX}px`);
       document.body.style.setProperty("--cursor-y", `${pointerY}px`);
+      hero.style.setProperty("--portrait-x", `${((pointerX / window.innerWidth) - 0.5) * 14}px`);
+      hero.style.setProperty("--portrait-y", `${((pointerY / window.innerHeight) - 0.5) * 10}px`);
       pointerFrame = 0;
     });
   });
@@ -35,6 +38,8 @@ if (window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
     pointerFrame = 0;
     document.body.style.removeProperty("--cursor-x");
     document.body.style.removeProperty("--cursor-y");
+    hero.style.removeProperty("--portrait-x");
+    hero.style.removeProperty("--portrait-y");
   });
 
   document.querySelectorAll(".skill-card, .project-card").forEach((card) => {
@@ -137,6 +142,9 @@ const updateScrollEffects = () => {
     const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
     const progress = scrollableHeight > 0 ? (window.scrollY / scrollableHeight) * 100 : 0;
     document.documentElement.style.setProperty("--scroll-progress", `${progress}%`);
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      hero.style.setProperty("--hero-scroll", `${window.scrollY * 0.08}px`);
+    }
     scrollEffectsFrame = 0;
   });
 };
